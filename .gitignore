@@ -1,0 +1,19 @@
+# vendored page — generated from the upstream project via sync_upstream.py
+Danbooru-Tag-Selector.html
+
+# dataset — copied from the upstream project via sync_upstream.py (9.8 MB)
+tags_with_groups.csv
+
+# personal data: your ledger never belongs in a repository
+data/
+
+# python runtime
+__pycache__/
+*.pyc
+
+# OS noise
+Thumbs.db
+.DS_Store
+
+# local one-shot helper (never commit)
+_run_first_push.*
