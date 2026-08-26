@@ -69,12 +69,19 @@
       } else if (e.data.type === 'dts_load_dataset') {
         if (typeof e.data.url !== 'string' || !e.data.url) return;
         fetch(e.data.url)
-          .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+          .then(function (r) {
+            // surface the server's own hint text (e.g. missing-dataset
+            // instructions) instead of a bare status code
+            return r.text().then(function (body) {
+              if (!r.ok) throw new Error(body || ('HTTP ' + r.status));
+              return body;
+            });
+          })
           .then(function (text) {
             if (typeof Papa === 'undefined') { toast('PapaParse 未加载，无法解析内置数据集'); return; }
             parseCSV(text);
           })
-          .catch(function (err) { toast('内置数据集加载失败: ' + err.message); });
+          .catch(function (err) { toast(err.message); });
       }
     });
     send('dts_ready');

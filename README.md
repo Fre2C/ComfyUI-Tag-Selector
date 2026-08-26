@@ -46,15 +46,14 @@ ComfyUI-Tag-Selector/
 
 ## 资产获取与上游同步
 
-本目录缺少页面或数据集时，执行：
+页面文件缺失时，插件会在 ComfyUI 启动时自动从上游 GitHub 仓库下载并注入桥接（已存在的文件永不覆盖）。也可以手动控制：
 
 ```
-python sync_upstream.py
+python sync_upstream.py            # 补齐缺失资产
+python sync_upstream.py --force    # 强制重新拉取全部
 ```
 
-脚本会检测缺什么，从上游 GitHub 仓库（Fre2C/Danbooru-Tag-Selector）自动下载并注入桥接；已存在的文件不会重复下载，加 `--force` 可强制全部重新拉取。拥有上游项目本机副本的开发者可用 `--local <上游路径>` 直接使用本地最新代码。
-
-注：页面可从上游仓库直接下载；数据集 CSV 需按上游「数据集」章节自行生成后放入本目录（sync 脚本检测到它存在时会跳过）。
+数据集 CSV 不在上游仓库中，需按上游「数据集」章节自行生成后放入本目录（支持 `tags_with_groups.csv` 或 `tags_enhanced.csv` 文件名）；缺失时浮窗与启动日志都会给出指引。
 
 ## 消息协议（`dts_` 前缀）
 
@@ -75,8 +74,8 @@ python sync_upstream.py
 
 | 文件 | 性质 | 如何获得 |
 |---|---|---|
-| `Danbooru-Tag-Selector.html` | 生成物 | 运行 `python sync_upstream.py --force`，从上游 GitHub 仓库自动下载并注入桥接 |
-| `tags_with_groups.csv` | 数据集 | 获取方式见上游 [Danbooru-Tag-Selector 的「数据集」章节](https://github.com/Fre2C/Danbooru-Tag-Selector#数据集)：由第三方标签数据经 `data_tool/` 脚本合并生成，生成后放入本目录 |
+| `Danbooru-Tag-Selector.html` | 生成物 | 首次启动 ComfyUI 时自动从上游仓库下载；也可手动运行 `python sync_upstream.py --force` 重新拉取 |
+| `tags_with_groups.csv` | 数据集 | 获取方式见上游 [Danbooru-Tag-Selector 的「数据集」章节](https://github.com/Fre2C/Danbooru-Tag-Selector#数据集)：由第三方标签数据经 `data_tool/` 脚本合并生成，放入本目录即可；文件名 `tags_enhanced.csv` 也被识别 |
 | `data/` | 个人账本 | 首次写入时自动创建，无需手动建 |
 
 未生成页面前，浮窗与双击入口会提示运行 sync 命令。

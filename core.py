@@ -7,9 +7,10 @@ ever touched at runtime.
 
 When the upstream project releases a new version, run:
 
-    python sync_upstream.py [upstream_dir]
+    python sync_upstream.py
 
-which refreshes the vendored page in place.
+which refreshes the vendored page in place. On ComfyUI startup the plugin
+also calls sync_upstream.ensure_assets() to fetch anything that is missing.
 """
 
 import json
@@ -19,8 +20,21 @@ from pathlib import Path
 _PLUGIN_DIR = Path(__file__).resolve().parent
 
 PAGE_FILE = _PLUGIN_DIR / "Danbooru-Tag-Selector.html"
-DATASET_FILE = _PLUGIN_DIR / "tags_with_groups.csv"
 LEDGER_PATH = _PLUGIN_DIR / "data" / "dts_data.json"
+
+# accepted dataset filenames, first match wins
+DATASET_CANDIDATES = ("tags_with_groups.csv", "tags_enhanced.csv")
+
+DATASET_DOC_URL = "https://github.com/Fre2C/Danbooru-Tag-Selector#数据集"
+
+
+def find_dataset_path():
+    """Return the first dataset file present in the plugin folder, or None."""
+    for name in DATASET_CANDIDATES:
+        path = _PLUGIN_DIR / name
+        if path.is_file():
+            return path
+    return None
 
 
 def read_page_html():
@@ -35,11 +49,18 @@ _dataset_cache = None
 
 
 def read_dataset_text():
-    """Read the built-in dataset once, keep it in memory afterwards."""
+    """Read the built-in dataset once, keep it in memory afterwards.
+
+    A failed lookup stays uncached on purpose: dropping the file in while
+    ComfyUI is running works without a restart.
+    """
     global _dataset_cache
     if _dataset_cache is None:
+        path = find_dataset_path()
+        if path is None:
+            return None
         try:
-            _dataset_cache = DATASET_FILE.read_text(encoding="utf-8")
+            _dataset_cache = path.read_text(encoding="utf-8")
         except OSError:
             return None
     return _dataset_cache
